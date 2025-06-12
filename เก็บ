@@ -1,0 +1,66 @@
+// src/App.js
+import React, { useState } from "react";
+import StockManager from "./StockManager";
+import ScanToStock from "./ScanToStock";
+import POS from "./components/POS";
+import Dashboard from "./components/Dashboard";
+import { AuthProvider, useAuth } from "./AuthContext";
+import LoginPage from "./LoginPage";
+
+function AppContent() {
+  const [activeTab, setActiveTab] = useState('pos');
+  const { user, logout } = useAuth();
+
+  if (!user) return <LoginPage />;
+
+  return (
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '20px' }}>
+      <div style={{ textAlign: "right", marginBottom: 8 }}>
+        สวัสดี {user.username} ({user.role}) <button onClick={logout}>ออกจากระบบ</button>
+      </div>
+      <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>ระบบจัดการสต็อกสินค้า</h1>
+      {/* Navigation Tabs */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '30px',
+        borderBottom: '1px solid #ccc'
+      }}>
+        {/* ... (เหมือนเดิม) */}
+        {/* สามารถซ่อนเมนูบางอันตาม role ได้ เช่น */}
+        {user.role === "admin" && (
+          <button
+            onClick={() => setActiveTab('stock')}
+            style={{
+              padding: '10px 20px',
+              margin: '0 10px',
+              border: 'none',
+              background: activeTab === 'stock' ? '#007bff' : '#f8f9fa',
+              color: activeTab === 'stock' ? 'white' : 'black',
+              cursor: 'pointer',
+              borderRadius: '5px 5px 0 0'
+            }}
+          >
+            จัดการสต็อก
+          </button>
+        )}
+        {/* ...ปุ่มอื่นๆ */}
+      </div>
+      {/* Content */}
+      <div style={{ padding: '20px' }}>
+        {activeTab === 'pos' && <POS />}
+        {activeTab === 'scan' && <ScanToStock />}
+        {activeTab === 'stock' && user.role === "admin" && <StockManager />}
+        {activeTab === 'dashboard' && <Dashboard />}
+      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
+  );
+}
